@@ -1,11 +1,13 @@
 package net.simplifiedcoding.navigationdrawerexample.fragments;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -126,26 +128,24 @@ public class FragmentAddOutreachList extends Fragment implements Callback<OutRea
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_sstory);
         no_task_tv = (TextView) view.findViewById(R.id.no_task_tv);
         task_name_tv = (TextView) view.findViewById(R.id.task_name_tv);
-        add_success_iv = (ImageView) view.findViewById(R.id.add_success_iv);
+        add_success_iv = (ImageView) view.findViewById(R.id.add_success_stry_iv);
         add_success_iv.setVisibility(View.VISIBLE);
+        ((ImageView)view.findViewById(R.id.add_success_iv)).setVisibility(View.GONE);
 
         task_name_tv.setText(getString(R.string.out_reach));
 //        LinearLayoutManager layoutManager = new LinearLayoutManager(this.getContext());
 //        layoutManager.setSmoothScrollbarEnabled(true);
 //        recyclerView.setLayoutManager(layoutManager);
 //        recyclerView.setItemAnimator(new DefaultItemAnimator());
-
 //        tvTitleName.setText("FAQs");
         if (AndroidUtil.isConnectingToInternet(getActivity())) {
             getOutReachListServerData();
         } else {
             Toast.makeText(getActivity(), Constant.check_internet_connection, Toast.LENGTH_SHORT).show();
-
         }
         add_success_iv.setOnClickListener(this);
 //        adapterNewTask = new AdapterNewTask(getContext());
 //        recyclerView.setAdapter(adapterNewTask);
-
     }
 
     private void getOutReachListServerData() {
@@ -202,7 +202,7 @@ public class FragmentAddOutreachList extends Fragment implements Callback<OutRea
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.add_success_iv:
+            case R.id.add_success_stry_iv:
                 Fragment fragment = new FragmentAddOutReach();
                 ((MainActivity) getActivity()).replacefragment(fragment);
                 break;
@@ -224,7 +224,6 @@ public class FragmentAddOutreachList extends Fragment implements Callback<OutRea
             if (Integer.parseInt(outReachData.getStatus()) == Constant.StatusCode.CLEANMONEY_CODE_SUCCESS) {
                 if (outReachData.getData() != null && outReachData.getData().size() > 0) {
                     datumList = outReachData.getData();
-
 
                     LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
                     layoutManager.setSmoothScrollbarEnabled(true);
@@ -279,4 +278,8 @@ public class FragmentAddOutreachList extends Fragment implements Callback<OutRea
 //        });
 
     }
+
+
+
+
 }

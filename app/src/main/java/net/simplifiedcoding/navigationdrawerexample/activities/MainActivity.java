@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(Gravity.LEFT)) {
             drawer.closeDrawer(Gravity.LEFT);
         } else {
-            if (FragmentTaskDashBoard.newInstance() != null && FragmentTaskDashBoard.newInstance().isVisible()) {
+            if (FragmentHomeScreen.newInstance() != null && FragmentHomeScreen.newInstance().isVisible()) {
                 // if (FragmentHomeScreen.getInstance() != null && FragmentHomeScreen.getInstance().isVisible()) {
                 displaySelectedScreen(R.id.menu_dashboard);
             } else {

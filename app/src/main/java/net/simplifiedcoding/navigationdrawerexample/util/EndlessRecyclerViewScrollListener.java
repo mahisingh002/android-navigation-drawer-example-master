@@ -1,4 +1,4 @@
-package com.cambiar.ludusz.util;
+package net.simplifiedcoding.navigationdrawerexample.util;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;

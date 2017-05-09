@@ -73,15 +73,12 @@ public class FragmentSuccessStoriesList extends Fragment implements Callback<Suc
 
     public static FragmentSuccessStoriesList newInstance() {
         FragmentSuccessStoriesList fragment = new FragmentSuccessStoriesList();
-
-
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -91,7 +88,6 @@ public class FragmentSuccessStoriesList extends Fragment implements Callback<Suc
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 //        editor = sharedpreferences.edit();
         initView(rootView);
-
         return rootView;
     }
 
@@ -130,7 +126,7 @@ public class FragmentSuccessStoriesList extends Fragment implements Callback<Suc
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_sstory);
         no_task_tv = (TextView) view.findViewById(R.id.no_task_tv);
         task_name_tv = (TextView) view.findViewById(R.id.task_name_tv);
-        add_success_iv = (ImageView) view.findViewById(R.id.add_success_iv);
+        add_success_iv = (ImageView) view.findViewById(R.id.add_success_stry_iv);
         add_success_iv.setVisibility(View.VISIBLE);
 
         task_name_tv.setText(getString(R.string.success_storiess));
@@ -206,7 +202,7 @@ public class FragmentSuccessStoriesList extends Fragment implements Callback<Suc
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.add_success_iv:
+            case R.id.add_success_stry_iv:
                 Fragment fragment = new FragmentSuccessStories();
                 ((MainActivity) getActivity()).replacefragment(fragment);
                 break;
@@ -229,7 +225,6 @@ public class FragmentSuccessStoriesList extends Fragment implements Callback<Suc
                 if (successStoriesData.getData() != null && successStoriesData.getData().size() > 0) {
                     datumList = successStoriesData.getData();
 
-
                     LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
                     layoutManager.setSmoothScrollbarEnabled(true);
                     recyclerView.setLayoutManager(layoutManager);
@@ -239,7 +234,7 @@ public class FragmentSuccessStoriesList extends Fragment implements Callback<Suc
                     recyclerView.setAdapter(adapterSuccessStories);
                     adapterSuccessStories.setOnItemClickListener(FragmentSuccessStoriesList.this);
                 } else {
-                    no_task_tv.setText(getString(R.string.no_favtask));
+                    no_task_tv.setText(getString(R.string.no_success_stories));
                     no_task_tv.setVisibility(View.VISIBLE);
                 }
             }

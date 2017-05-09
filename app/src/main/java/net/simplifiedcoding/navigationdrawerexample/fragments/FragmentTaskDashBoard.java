@@ -22,6 +22,7 @@ import net.simplifiedcoding.navigationdrawerexample.Constant.Constant;
 import net.simplifiedcoding.navigationdrawerexample.Model.DashboardData;
 import net.simplifiedcoding.navigationdrawerexample.R;
 import net.simplifiedcoding.navigationdrawerexample.activities.MainActivity;
+import net.simplifiedcoding.navigationdrawerexample.util.Config;
 
 import java.lang.ref.WeakReference;
 
@@ -225,34 +226,66 @@ public class FragmentTaskDashBoard extends Fragment implements Callback<Dashboar
         switch (view.getId()) {
             case R.id.mynewtask_relative:
                 FragmentNewTask fragmentNewTask = new FragmentNewTask();
+                Bundle bundle6 = new Bundle();
+                bundle6.putBoolean(Config.ColorValue, true);
+                bundle6.putBoolean(Config.Todo_monitering, true);
+                fragmentNewTask.setArguments(bundle6);
                 ((MainActivity) getActivity()).replacefragment(fragmentNewTask);
                 break;
             case R.id.mypendingtask_relative:
                 FragmentPendingTask fragmentPendingTask = new FragmentPendingTask();
+                Bundle bundle7 = new Bundle();
+                bundle7.putBoolean(Config.ColorValue, true);
+                bundle7.putBoolean(Config.Todo_monitering, true);
+                fragmentPendingTask.setArguments(bundle7);
                 ((MainActivity) getActivity()).replacefragment(fragmentPendingTask);
                 break;
             case R.id.myclosedtask_relative:
                 FragmentClosedTask fragmentClosedTask = new FragmentClosedTask();
+                Bundle bundle = new Bundle();
+                bundle.putBoolean(Config.ColorValue, false);
+                bundle.putBoolean(Config.Todo_monitering, false);
+                fragmentClosedTask.setArguments(bundle);
                 ((MainActivity) getActivity()).replacefragment(fragmentClosedTask);
                 break;
             case R.id.assign_closedtask_relative:
                 FragmentAssignCloseTask fragmentAssignedNewTask = new FragmentAssignCloseTask();
+                Bundle bundle1 = new Bundle();
+                bundle1.putBoolean(Config.ColorValue, false);
+                bundle1.putBoolean(Config.Todo_monitering, false);
+                fragmentAssignedNewTask.setArguments(bundle1);
                 ((MainActivity) getActivity()).replacefragment(fragmentAssignedNewTask);
                 break;
             case R.id.assign_pendingtask_relative:
                 FragmentAssignReadyUpdateTask fragmentAssignReadyUpdateTask = new FragmentAssignReadyUpdateTask();
+                Bundle bundle2 = new Bundle();
+                bundle2.putBoolean(Config.ColorValue, true);
+                bundle2.putBoolean(Config.Todo_monitering, false);
+                fragmentAssignReadyUpdateTask.setArguments(bundle2);
                 ((MainActivity) getActivity()).replacefragment(fragmentAssignReadyUpdateTask);
                 break;
             case R.id.assign_newtask_relative:
                 FragmentAssignedNewTask assignedNewTask = new FragmentAssignedNewTask();
+                Bundle bundle3 = new Bundle();
+                bundle3.putBoolean(Config.ColorValue, true);
+                bundle3.putBoolean(Config.Todo_monitering, false);
+                assignedNewTask.setArguments(bundle3);
                 ((MainActivity) getActivity()).replacefragment(assignedNewTask);
                 break;
             case R.id.mycompletetask_relative:
                 FragmentCompletedTask fragmentCompletedTask = new FragmentCompletedTask();
+                Bundle bundle4 = new Bundle();
+                bundle4.putBoolean(Config.ColorValue, false);
+                bundle4.putBoolean(Config.Todo_monitering, false);
+                fragmentCompletedTask.setArguments(bundle4);
                 ((MainActivity) getActivity()).replacefragment(fragmentCompletedTask);
                 break;
             case R.id.assign_wip_relative:
                 FragmentWIPTask fragmentWIPTask = new FragmentWIPTask();
+                Bundle bundle5 = new Bundle();
+                bundle5.putBoolean(Config.ColorValue, true);
+                bundle5.putBoolean(Config.Todo_monitering, false);
+                fragmentWIPTask.setArguments(bundle5);
                 ((MainActivity) getActivity()).replacefragment(fragmentWIPTask);
                 break;
 

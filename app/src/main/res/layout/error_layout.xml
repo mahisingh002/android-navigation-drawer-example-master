@@ -21,8 +21,8 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="20dp"
             android:layout_weight="1"
-            android:background="@drawable/button_selector_green"
-            android:backgroundTint="@color/green"
+            android:background="@drawable/button_selector_blue_shade"
+            android:backgroundTint="@color/sky_blue"
             android:text="@string/retry"
             android:textColor="@color/white" />
     </LinearLayout>
@@ -36,7 +36,7 @@
         android:layout_marginTop="30dp"
         android:text="@string/oops"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/dark_black"
+        android:textColor="@color/black"
         android:textSize="60sp" />
 
     <TextView
@@ -49,7 +49,7 @@
         android:shadowDx="1"
         android:shadowDy="2"
         android:shadowRadius="3"
-        android:text="@string/something_went_wrong"
+        android:text="@string/went_wrong"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <TextView
