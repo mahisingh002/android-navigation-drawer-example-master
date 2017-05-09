@@ -35,17 +35,17 @@
                 android:gravity="center"
                 android:layout_toRightOf="@+id/btn_drawer">
 
-                <ImageView
+             <!--   <ImageView
                     android:id="@+id/logo"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:src="@mipmap/clean_money_headerlogo" />
+                    android:src="@mipmap/clean_money_headerlogo" />-->
 
                 <ImageView
                     android:id="@+id/logoitd"
                     android:layout_width="60dp"
                     android:layout_height="50dp"
-                    android:src="@drawable/itdlogo" />
+                    android:src="@drawable/itdlogonew" />
             </LinearLayout>
 
             <LinearLayout

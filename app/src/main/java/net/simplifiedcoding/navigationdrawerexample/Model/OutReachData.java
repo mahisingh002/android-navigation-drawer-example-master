@@ -84,9 +84,99 @@ public class Datum {
     @SerializedName("updated_by")
     @Expose
     private String updatedBy;
+    //////////////////////////////////////////
+    @SerializedName("topic")
+    @Expose
+    private String topic;
+    @SerializedName("participants")
+    @Expose
+    private String participants;
+    @SerializedName("state")
+    @Expose
+    private String state;
+    @SerializedName("pincode")
+    @Expose
+    private String pincode;
+    @SerializedName("audiance")
+    @Expose
+    private String audiance;
+    @SerializedName("state_id")
+    @Expose
+    private int state_id;
+    @SerializedName("activities")
+    @Expose
+    private String activities;
+    @SerializedName("audience_id")
+    @Expose
+    private int audience_id;
     @SerializedName("img")
     @Expose
     private List<Img> img = null;
+
+    public int getAudience_id() {
+        return audience_id;
+    }
+
+    public void setAudience_id(int audience_id) {
+        this.audience_id = audience_id;
+    }
+
+    public int getState_id() {
+
+        return state_id;
+    }
+
+    public void setState_id(int state_id) {
+        this.state_id = state_id;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public String getParticipants() {
+        return participants;
+    }
+
+    public void setParticipants(String participants) {
+        this.participants = participants;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getPincode() {
+        return pincode;
+    }
+
+    public void setPincode(String pincode) {
+        this.pincode = pincode;
+    }
+
+    public String getAudiance() {
+        return audiance;
+    }
+
+    public void setAudiance(String audiance) {
+        this.audiance = audiance;
+    }
+
+    public String getActivities() {
+        return activities;
+    }
+
+    public void setActivities(String activities) {
+        this.activities = activities;
+    }
 
     public String getOutreachId() {
         return outreachId;

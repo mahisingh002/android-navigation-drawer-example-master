@@ -1,6 +1,256 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:card_view="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp">
 
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@color/white"
+        android:elevation="3dp"
+        app:cardBackgroundColor="@color/orginal_white"
+        app:cardCornerRadius="1dp"
+        app:cardElevation="1dp"
+        app:cardUseCompatPadding="true"
+        card_view:cardCornerRadius="@dimen/card_album_radius">
+
+        <LinearLayout
+            android:id="@+id/ll_clickable"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingLeft="3dp"
+            android:paddingRight="3dp">
+
+            <!--<LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@mipmap/icon_assignedby"
+                    android:drawablePadding="2dp"
+                    android:text="@string/assigned_by"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/activity_vertical_margin" />
+
+                <TextView
+                    android:id="@+id/assigned_name_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="1dp"
+                    android:text=""
+                    android:textColor="@color/black" />
+            </LinearLayout>-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@mipmap/icon_assignedby"
+                    android:drawablePadding="2dp"
+                    android:text="@string/respondedby"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/created_by"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/black" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@mipmap/icon_assignedon"
+                    android:drawablePadding="2dp"
+                    android:text="@string/respondedon"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/responded_on"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/black" />
+            </LinearLayout>
+
+            <!--<LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <TextView
+                    android:id="@+id/task_comp_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@mipmap/icon_subject"
+                    android:drawablePadding="2dp"
+                    android:text="@string/task_completion_date"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/activity_vertical_margin" />
+
+                <TextView
+                    android:id="@+id/task_comp_date_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/black" />
+            </LinearLayout>-->
+
+            <!-- <LinearLayout
+                 android:id="@+id/status_ll"
+                 android:layout_width="match_parent"
+                 android:layout_height="wrap_content"
+                 android:orientation="horizontal"
+                 android:padding="2dp">
+
+                 <TextView
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:drawableLeft="@mipmap/icon_status"
+                     android:drawablePadding="2dp"
+                     android:text="@string/status"
+                     android:textColor="@color/black" />
+
+                 <TextView
+                     android:id="@+id/status_tv"
+                     android:layout_width="wrap_content"
+                     android:layout_height="wrap_content"
+                     android:text=""
+                     android:textColor="@color/black" />
+             </LinearLayout>-->
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="2dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@mipmap/icon_subject"
+                    android:drawablePadding="2dp"
+                    android:text="@string/message"
+                    android:textColor="@color/black" />
+
+                <TextView
+                    android:id="@+id/task_description_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/black" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_prev_attach"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_previous_doc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/prvious_attach" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="2dp">
+
+                    <TextView
+                        android:id="@+id/attachment_prev_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="2dp"
+                        android:textColor="@color/sky_blue" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_curr_attach"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_current_doc"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="2dp"
+                    android:layout_marginTop="5dp"
+                    android:text="@string/current_attach" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="2dp">
+
+                    <TextView
+                        android:id="@+id/attachment_current_tv"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="2dp"
+                        android:textColor="@color/sky_blue" />
+
+                    <TextView
+                        android:id="@+id/tv_viewattachment"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="5dp"
+                        android:drawablePadding="3dp"
+                        android:drawableLeft="@drawable/attachment_view"
+                        android:layout_weight="1.8"
+                        android:visibility="gone"
+                        android:layout_marginTop="2dp"
+                        android:layout_marginBottom="2dp"
+                        android:text="@string/view_attachment"
+                        android:textColor="@color/sky_blue" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
 </LinearLayout>

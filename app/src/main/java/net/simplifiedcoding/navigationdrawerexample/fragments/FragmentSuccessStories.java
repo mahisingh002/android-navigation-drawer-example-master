@@ -1,25 +1,27 @@
 package net.simplifiedcoding.navigationdrawerexample.fragments;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.AppCompatEditText;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -31,11 +33,13 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Picasso;
+
 import net.simplifiedcoding.navigationdrawerexample.Constant.Constant;
-import net.simplifiedcoding.navigationdrawerexample.Model.NewTaskData;
 import net.simplifiedcoding.navigationdrawerexample.R;
 import net.simplifiedcoding.navigationdrawerexample.activities.MainActivity;
 import net.simplifiedcoding.navigationdrawerexample.util.AndroidUtil;
@@ -46,6 +50,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.List;
 
 import id.zelory.compressor.Compressor;
 import okhttp3.MediaType;
@@ -64,28 +69,27 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Query;
 
-/**
- * Created by Vibes37 on 21/3/2017.
- */
-
 public class FragmentSuccessStories extends Fragment implements Callback<ResponseBody>, View.OnClickListener {
     private ProgressDialog pDialog;
     SharedPreferences sharedpreferences;
     TextView tvTitleName, image_tv;
     String user_id;
     File image_file, document_file;
-    AppCompatEditText title_ed, heading_ed, desc_ed, author_ed, url_ed;
+    AppCompatEditText title_ed, desc_ed, author_ed, url_ed;
     AppCompatButton btn_submit, btn_browse;
     private FragmentPendingTask.OnFragmentInteractionListener mListener;
     private Uri imageUri;
     String realPath, path;
-
+    String userChoosenTask;
+    boolean cameraflag = true;
+    private RelativeLayout image1_layout;
+    private ImageView product_image1, cross_image1;
+    String gallery_package = "";
     private static final int PICK_DOCUMENT_FROM_CAMERA = 1;
     private static final int PICK_DOCUMENT_FROM_GALLERY = 2;
     private static final int CROP_FROM_CAMERA = 3;
     View view;
     String frag, title, heading, desc, author, url, image, success_id;
-
 
     public FragmentSuccessStories() {
         // Required empty public constructor
@@ -113,6 +117,7 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
         Bundle bundle = getArguments();
         if (bundle != null) {
             frag = bundle.getString("frag");
+
             title = bundle.getString("title");
             heading = bundle.getString("heading");
             desc = bundle.getString("desc");
@@ -120,6 +125,8 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
             url = bundle.getString("url");
             success_id = bundle.getString("success_id");
             image = bundle.getString("image");
+
+
         }
         initView(view);
 
@@ -159,18 +166,21 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
         });
 
 
-        tvTitleName = (TextView) view.findViewById(R.id.tv_actionbar_title);
+        tvTitleName = (TextView) view.findViewById(R.id.task_name_tv);
         title_ed = (AppCompatEditText) view.findViewById(R.id.title_ed);
-        heading_ed = (AppCompatEditText) view.findViewById(R.id.heading_ed);
         desc_ed = (AppCompatEditText) view.findViewById(R.id.desc_ed);
         author_ed = (AppCompatEditText) view.findViewById(R.id.author_ed);
         url_ed = (AppCompatEditText) view.findViewById(R.id.url_ed);
         image_tv = (TextView) view.findViewById(R.id.image_tv);
         btn_submit = (AppCompatButton) view.findViewById(R.id.btn_submit);
         btn_browse = (AppCompatButton) view.findViewById(R.id.btn_browse);
+        image1_layout = (RelativeLayout) view.findViewById(R.id.image1_layout);
+        product_image1 = (ImageView) view.findViewById(R.id.product_image1);
+        cross_image1 = (ImageView) view.findViewById(R.id.cross_image1);
+        cross_image1.setOnClickListener(this);
         btn_submit.setOnClickListener(this);
         btn_browse.setOnClickListener(this);
-
+        tvTitleName.setText(getString(R.string.success_story));
 
 //        tvTitleName.setText("FAQs");
 //        getNewTaskServerData();
@@ -179,10 +189,10 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
             if (title != null && !title.isEmpty()) {
                 title_ed.setText(title);
             }
-            if (heading != null && !heading.isEmpty()) {
-                heading_ed.setText(heading);
-
-            }
+//            if (heading != null && !heading.isEmpty()) {
+//                heading_ed.setText(heading);
+//
+//            }
             if (desc != null && !desc.isEmpty()) {
                 desc_ed.setText(desc);
             }
@@ -195,6 +205,7 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
             if (image != null && !image.isEmpty()) {
                 image_tv.setText("You have 1 attachment");
                 image_tv.setTextColor(getResources().getColor(R.color.green));
+                setImage();
             }
 
 
@@ -203,11 +214,10 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                 author_ed.setText(sharedpreferences.getString("name", "") + ", " + sharedpreferences.getString("designation", ""));
             }
         }
-
-
     }
 
     private void createSuccessStories() {
+        Call<ResponseBody> call;
         pDialog = new ProgressDialog(getContext(), R.style.DialogTheme);
         pDialog.setCancelable(false);
         if (pDialog != null) {
@@ -234,8 +244,11 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
             body = MultipartBody.Part.createFormData("pic", document_file.getName(), requestFile);
 
         }
-        Call<ResponseBody> call = ifaqdata.getData(user_id, title_ed.getText().toString(), desc_ed.getText().toString(), heading_ed.getText().toString(), author_ed.getText().toString(), url_ed.getText().toString(), body);
-
+        if (body != null) {
+            call = ifaqdata.getData(user_id, title_ed.getText().toString(), desc_ed.getText().toString(), author_ed.getText().toString(), url_ed.getText().toString(), body);
+        } else {
+            call = ifaqdata.getData(user_id, title_ed.getText().toString(), desc_ed.getText().toString(), author_ed.getText().toString(), url_ed.getText().toString());
+        }
         call.enqueue(this);
 
         //ody> getData(@Query("title") String title, @Query("description") String description, @Query("heading") String heading,@Query("author") String author,@Query("url") String url);
@@ -262,6 +275,7 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
         if (sharedpreferences.getString("User_id", "") != null) {
             user_id = sharedpreferences.getString("User_id", "");
         }
+        Call<ResponseBody> call = null;
         MultipartBody.Part body = null;
         if (document_file != null) {
             RequestBody requestFile =
@@ -271,8 +285,19 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
             // MultipartBody.Part is used to send also the actual file name
             body = MultipartBody.Part.createFormData("pic", document_file.getName(), requestFile);
         }
-        Call<ResponseBody> call = ifaqdata.sendEditData(success_id, user_id, title_ed.getText().toString(), desc_ed.getText().toString(), heading_ed.getText().toString(), author_ed.getText().toString(), url_ed.getText().toString(), body);
-
+        if (body != null) {
+            if (!desc_ed.getText().toString().isEmpty()) {
+                call = ifaqdata.sendEditData(success_id, user_id, title_ed.getText().toString(),
+                        desc_ed.getText().toString(),
+                        author_ed.getText().toString(),
+                        url_ed.getText().toString(),
+                        body);
+            } else {
+                Toast.makeText(getActivity(), "Description cannot be blank", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            call = ifaqdata.sendEditData(success_id, user_id, title_ed.getText().toString(), desc_ed.getText().toString(), author_ed.getText().toString(), url_ed.getText().toString());
+        }
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -308,10 +333,17 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
             }
         });
 
-
         //ody> getData(@Query("title") String title, @Query("description") String description, @Query("heading") String heading,@Query("author") String author,@Query("url") String url);
+    }
 
-
+    public void showMessage(View view, String tag) {
+        if (view != null && view.isShown()) {
+            Snackbar snack = Snackbar.make(view, tag, Snackbar.LENGTH_LONG);
+            View v = snack.getView();
+            TextView tv = (TextView) v.findViewById(android.support.design.R.id.snackbar_text);
+            tv.setTextColor(Color.WHITE);
+            snack.show();
+        }
     }
 
 
@@ -348,7 +380,7 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                 if (jsonObject.getInt("status") == Constant.StatusCode.CLEANMONEY_CODE_SUCCESS) {
                     Toast.makeText(getActivity(), jsonObject.getString("tag"), Toast.LENGTH_LONG).show();
                     title_ed.setText("");
-                    heading_ed.setText("");
+//                    heading_ed.setText("");
                     desc_ed.setText("");
                     url_ed.setText("");
                     document_file = null;
@@ -379,18 +411,45 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_submit:
-
                 checkEditText();
-
                 break;
             case R.id.btn_browse:
                 if (!(view.findViewById(R.id.footer_dialog).getVisibility() == View.VISIBLE)) {
-                    initFooter(view.findViewById(R.id.footer_dialog), "document");
+                    if (image_tv.getText().toString().contains("You have 1 attachment")) {
+                        Toast.makeText(getActivity(), "please delete image before edit ", Toast.LENGTH_LONG).show();
+                    } else {
+                        initFooter(view.findViewById(R.id.footer_dialog), "document");
+                    }
                 }
+                break;
+            case R.id.cross_image1:
+                if (image1_layout.getVisibility() == View.VISIBLE) {
+                    document_file = null;
+                    image_tv.setText("");
+                    image = "";
+
+                }
+
+                image1_layout.setVisibility(View.GONE);
                 break;
         }
     }
 
+
+    private void setImage() {
+        if (image.length() > 0 && image != null && !image.equalsIgnoreCase("")) {
+            if (image1_layout.getVisibility() == View.GONE) {
+                image1_layout.setVisibility(View.VISIBLE);
+                Picasso.with(getActivity())
+                        .load(image)
+                        .into(product_image1);
+
+
+            }
+        } else {
+            image1_layout.setVisibility(View.GONE);
+        }
+    }
 
     public void initFooter(final View view, final String type) {
         if (view != null) {
@@ -412,30 +471,25 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                     if (view.getVisibility() == View.VISIBLE) {
                         view.setVisibility(View.GONE);
                     }
-                    //
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                        if (getActivity().checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                             ///method to get Images
                             takeimage(type);
                         } else {
-                            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                            if (shouldShowRequestPermissionRationale(android.Manifest.permission.CAMERA)) {
                                 Toast.makeText(getActivity(), "Your Permission is needed to get " + "access the camera", Toast.LENGTH_LONG).show();
                             }
-                            FragmentSuccessStories.this.requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.CAMERA}, PICK_DOCUMENT_FROM_CAMERA);
+                            FragmentSuccessStories.this.requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.CAMERA,}, PICK_DOCUMENT_FROM_CAMERA);
+
                         }
                     } else {
                         takeimage(type);
                     }
-
-
-                    //
                 }
-
             });
             galleryimage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     // slide down animation for footer dialog
                     Animation slideDown = AnimationUtils.loadAnimation(getActivity(), R.anim.slide_down);
                     view.startAnimation(slideDown);
@@ -443,26 +497,14 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                         view.setVisibility(View.GONE);
                     }
 
-
-                    Intent intent = new Intent();
-                    try {
-                        intent.setType("image/*");
-                        intent.setAction(Intent.ACTION_GET_CONTENT);
-                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-                        if (type.equalsIgnoreCase("document")) {
-                            //                            intent.setType("*/*");
-                            startActivityForResult(Intent.createChooser(intent, "Complete action using"), PICK_DOCUMENT_FROM_GALLERY);
-                        }
-
-                    } catch (ActivityNotFoundException e) {
-
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        FragmentSuccessStories.this.requestPermissions(new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE}, PICK_DOCUMENT_FROM_GALLERY);
+                    } else {
+                        takeimagefromCamera(type);
                     }
-
                 }
 
-
             });
-
             downimage.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -473,7 +515,21 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                     }
                 }
             });
+        }
+    }
 
+    private void takeimagefromCamera(String type) {
+        Intent intent = new Intent();
+        try {
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+           /* intent = new Intent(Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);*/
+            if (type.equalsIgnoreCase(type)) {
+                startActivityForResult(Intent.createChooser(intent, "Complete action using"), CROP_FROM_CAMERA);
+            }
+        } catch (ActivityNotFoundException e) {
 
         }
     }
@@ -483,8 +539,6 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
         switch (permsRequestCode) {
 
             case PICK_DOCUMENT_FROM_CAMERA:
-
-
                 boolean cameraAccepted = grantResults[2] == PackageManager.PERMISSION_GRANTED;
                 if (cameraAccepted) {
                     takeimage("document");
@@ -496,26 +550,28 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                 boolean cropAccepted = grantResults[2] == PackageManager.PERMISSION_GRANTED;
 
                 break;
+            case PICK_DOCUMENT_FROM_GALLERY:
+                boolean galleryAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                if (galleryAccepted) {
+                    takeimagefromCamera("document");
+                }
+                break;
         }
     }
 
-    private void takeimage(String type) {
-
-
+    /*private void takeimage(String type) {
         // calling the camera activity
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
         // get current timestamp
         String milliStr = Calendar.getInstance().getTimeInMillis() + "";
 
-        File f = new File(android.os.Environment.getExternalStorageDirectory(), "Swacch_" + milliStr + "_.jpg");
-        imageUri = Uri.fromFile(f);
+        File f = new File(android.os.Environment.getExternalStorageDirectory(), "SWACCH_" + milliStr + ".jpg");
+//        imageUri = Uri.fromFile(f);
+        imageUri = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", f);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
 
-        //        intent.putExtra(MediaStore.EXTRA_OUTPUT, MediaStore.Images.Media.INTERNAL_CONTENT_URI.toString());
         try {
-
-            //            intent.putExtra("return-data", true);
 
             if (type.equalsIgnoreCase("document")) {
                 startActivityForResult(intent, PICK_DOCUMENT_FROM_CAMERA);
@@ -523,8 +579,132 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
 
         } catch (ActivityNotFoundException e) {
         }
+    }*/
+
+    protected void takeimage(String type) {
+
+        final boolean nougat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N;
+
+        if (nougat) {
+
+            cameraflag = false;
+
+
+            String milliStr = Calendar.getInstance().getTimeInMillis() + "";
+            File f = new File(android.os.Environment.getExternalStorageDirectory(), "SWACCH_" + milliStr + ".jpg");
+
+            // imageUri = Uri.fromFile(f);
+
+            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+//            fileTemp = ImageUtils.getOutputMediaFile();
+                ContentValues values = new ContentValues(1);
+                values.put(MediaStore.Images.Media.MIME_TYPE, String.valueOf(f));
+                imageUri = getActivity().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+//            if (fileTemp != null) {
+//            fileUri = Uri.fromFile(fileTemp);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                startActivityForResult(intent, CROP_FROM_CAMERA);
+//
+
+
+            }
+
+
+        } else {
+
+
+            try {
+
+
+                Log.i("MakeMachine", "startCameraActivity()");
+                // File file = new File(_path);
+                String milliStr = Calendar.getInstance().getTimeInMillis() + "";
+                File f = new File(android.os.Environment.getExternalStorageDirectory(), "SWACCH_" + milliStr + ".jpg");
+
+                imageUri = Uri.fromFile(f);
+
+                String defaultCameraPackage = "";
+                final PackageManager packageManager = getActivity().getPackageManager();
+                List<ApplicationInfo> list = packageManager.getInstalledApplications(PackageManager.GET_UNINSTALLED_PACKAGES);
+                for (int n = 0; n < list.size(); n++) {
+                    if ((list.get(n).flags & ApplicationInfo.FLAG_SYSTEM) == 1) {
+                        Log.e("TAG", "Installed Applications  : " + list.get(n).loadLabel(packageManager).toString());
+                        Log.e("TAG", "package name  : " + list.get(n).packageName);
+
+                        //temp value in case camera is gallery app above jellybean
+                        String packag = list.get(n).loadLabel(packageManager).toString();
+                        if (packag.equalsIgnoreCase("Gallery") || packag.equalsIgnoreCase("Galeri") || packag.equalsIgnoreCase("الاستوديو")) {
+                            gallery_package = list.get(n).packageName;
+                        }
+
+                        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            if (packag.equalsIgnoreCase("Camera") || packag.equalsIgnoreCase("Kamera") || packag.equalsIgnoreCase("الكاميرا")) {
+                                defaultCameraPackage = list.get(n).packageName;
+                                break;
+                            }
+                        } else {
+
+                            if (packag.equalsIgnoreCase("Camera") || packag.equalsIgnoreCase("Kamera") || packag.equalsIgnoreCase("الكاميرا")) {
+
+                                defaultCameraPackage = list.get(n).packageName;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                //com.android.gallery3d
+
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                intent.setPackage(defaultCameraPackage);
+                startActivityForResult(intent, CROP_FROM_CAMERA);
+            } catch (ActivityNotFoundException e) {
+                e.printStackTrace();
+
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                intent.setPackage(gallery_package);
+                startActivityForResult(intent, CROP_FROM_CAMERA);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+
+        }
     }
 
+
+
+
+    /*private void takeimage(String type) {
+
+        // calling the camera activity
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        // get current timestamp
+        String milliStr = Calendar.getInstance().getTimeInMillis() + "";
+
+        File f = new File(android.os.Environment.getExternalStorageDirectory(), "SWACCH_" + milliStr + ".jpg");
+//        imageUri = Uri.fromFile(f);
+        // imageUri= FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", f);
+
+        imageUri = Uri.fromFile(f);
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+
+        try {
+
+            if (type.equalsIgnoreCase("document")) {
+                startActivityForResult(intent, CROP_FROM_CAMERA);
+            }
+
+        } catch (ActivityNotFoundException e) {
+        }
+    }*/
 
     // getting the result of camera and gallery on base of request code
     @Override
@@ -538,15 +718,12 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                 try {
                     if (data != null) {
                         extras = data.getExtras();
-
                     }
-
                     if (imageUri != null) {
                         performCrop(imageUri);
                     }
 
                     //
-
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -561,8 +738,6 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
 
                         imageUri = data.getData();
 
-                        //
-
 
                         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
@@ -572,32 +747,35 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                         } else {
                             realPath = getImagePath(imageUri);
                         }
-                        //                        }
 
 
                         File f = new File(realPath);
-                        Uri contentUri = Uri.fromFile(f);
-
-                        //
-
+//                            Uri contentUri = Uri.fromFile(f);
+                        Uri contentUri = FileProvider.getUriForFile(getActivity(), getActivity().getApplicationContext().getPackageName() + ".provider", f);
                         performCrop(contentUri);
-                        //                        }
 
                         document_file = new File(realPath);
 
                     }
 
-
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
         } else if (requestCode == CROP_FROM_CAMERA)
 
         {
             if (resultCode == Activity.RESULT_OK) {
-                imageUri = data.getData();
+
+                if (cameraflag) {
+                    if (imageUri == null) {
+                        if (data != null) {
+
+                            imageUri = data.getData();
+                        }
+
+                    }
+                }
                 //
 
                 final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
@@ -614,14 +792,34 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
                 image_tv.setText("You have uploaded 1 image");
                 image_tv.setTextColor(getResources().getColor(R.color.green));
 
-                //                    uri_hashmap.put(lastmapkey, imageUri);
-                //                    image_file_hashmap.put(lastmapkey, document_file);
+                //  uri_hashmap.put(lastmapkey, imageUri);
+                //  image_file_hashmap.put(lastmapkey, document_file);
+
+                if (imageUri != null) {
+                    settingCropedImage(imageUri);
+                }
+
+                imageUri = null;
             }
 
 
         }
     }
 
+    private void settingCropedImage(Uri imageUri) {
+
+
+        try {
+            if (image1_layout.getVisibility() == View.GONE) {
+                image1_layout.setVisibility(View.VISIBLE);
+                Bitmap bitmap = null;
+                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
+                product_image1.setImageBitmap(bitmap);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public String getImagePath(Uri uri) {
         Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null);
@@ -642,17 +840,80 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
     }
 
 
+    /* private void performCrop(Uri picUri) {
+         try {
+             //
+            *//* Intent cropIntent;
+            //Start Crop Activity
+            cropIntent = new Intent("com.android.camera.action.CROP");
+            //            cropIntent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            cropIntent.setDataAndType(picUri, "image*//**//*");
+            // set crop properties
+            cropIntent.putExtra("crop", "true");
+            List<ResolveInfo> resInfoList = getActivity().getPackageManager().queryIntentActivities(cropIntent, PackageManager.MATCH_DEFAULT_ONLY);
+            for (ResolveInfo resolveInfo : resInfoList) {
+                String packageName = resolveInfo.activityInfo.packageName;
+                getActivity().grantUriPermission(packageName, picUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+
+            startActivityForResult(cropIntent, CROP_FROM_CAMERA);*//*
+            Intent intent = new Intent();
+            // call android default gallery
+            intent.setData(picUri);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            // ******** code for crop image
+            intent.putExtra("crop", "true");
+            intent.putExtra("aspectX", 0);
+            intent.putExtra("aspectY", 0);
+            try {
+                intent.putExtra("return-data", true);
+                startActivityForResult(intent*//*Intent.createChooser(intent,"Complete action using")*//*,CROP_FROM_CAMERA);
+
+            } catch (ActivityNotFoundException e) {
+            }
+
+
+
+        }
+        // respond to users whose devices do not support the crop action
+        catch (ActivityNotFoundException anfe) {
+            // display an error message
+            String errorMessage = "your device doesn't support the crop action!";
+        }
+    }*/
     private void performCrop(Uri picUri) {
         try {
             //
-            Intent cropIntent;
-            //Start Crop Activity
-            cropIntent = new Intent("com.android.camera.action.CROP");
-            cropIntent.setDataAndType(picUri, "image/*");
-            // set crop properties
-            cropIntent.putExtra("crop", "true");
+       /* Intent cropIntent;
+        //Start Crop Activity
+        cropIntent = new Intent("com.android.camera.action.CROP");
+        //            cropIntent = new Intent(Intent.ACTION_PICK,android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        cropIntent.setDataAndType(picUri, "image*//*");
+        // set crop properties
+        cropIntent.putExtra("crop", "true");
+        List<ResolveInfo> resInfoList = getActivity().getPackageManager().queryIntentActivities(cropIntent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            getActivity().grantUriPermission(packageName, picUri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
 
-            startActivityForResult(cropIntent, CROP_FROM_CAMERA);
+        startActivityForResult(cropIntent, CROP_FROM_CAMERA);*/
+            Intent intent = new Intent();
+            // call android default gallery
+            intent.setData(picUri);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            // ******** code for crop image
+            intent.putExtra("crop", "true");
+            intent.putExtra("aspectX", 0);
+            intent.putExtra("aspectY", 0);
+            try {
+                intent.putExtra("return-data", true);
+                startActivityForResult(intent/*Intent.createChooser(intent,"Complete action using")*/, CROP_FROM_CAMERA);
+
+            } catch (ActivityNotFoundException e) {
+            }
+
+
         }
         // respond to users whose devices do not support the crop action
         catch (ActivityNotFoundException anfe) {
@@ -661,45 +922,45 @@ public class FragmentSuccessStories extends Fragment implements Callback<Respons
         }
     }
 
-
     private void checkEditText() {
 
         if (title_ed.getText().length() == 0) {
             Toast.makeText(getActivity(), "Please enter title", Toast.LENGTH_LONG).show();
         } else if (desc_ed.getText().length() == 0) {
             Toast.makeText(getActivity(), "Please enter description", Toast.LENGTH_LONG).show();
-        } else if (url_ed.getText().length() == 0) {
+        } else {
 
-            Toast.makeText(getActivity(), "Please enter url", Toast.LENGTH_LONG).show();
-        } else if (url_ed.getText().length() != 0) {
-            if (AndroidUtil.isValidUrl(url_ed.getText().toString())) {
-                if (frag != null && frag.equalsIgnoreCase("edit_frag")) {
-                    if (AndroidUtil.isConnectingToInternet(getActivity())) {
-                        editSuccessStoriesDetail();
-                    } else {
-                        Toast.makeText(getActivity(), Constant.check_internet_connection, Toast.LENGTH_SHORT).show();
-                    }
+            if (frag != null && frag.equalsIgnoreCase("frag_edit")) {
+                if (AndroidUtil.isConnectingToInternet(getActivity())) {
+                    editSuccessStoriesDetail();
                 } else {
-                    if (AndroidUtil.isConnectingToInternet(getActivity())) {
-                        createSuccessStories();
-                    } else {
-                        Toast.makeText(getActivity(), Constant.check_internet_connection, Toast.LENGTH_SHORT).show();
-                    }
+                    Toast.makeText(getActivity(), Constant.check_internet_connection, Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(getActivity(), "Please enter valid url", Toast.LENGTH_LONG).show();
+                if (AndroidUtil.isConnectingToInternet(getActivity())) {
+                    createSuccessStories();
+                } else {
+                    Toast.makeText(getActivity(), Constant.check_internet_connection, Toast.LENGTH_SHORT).show();
+                }
             }
+
         }
     }
 
     public interface IFAQDATA {
         @Multipart
         @POST(Constant.WebUrl.CREATE_SUCCESS_STORIES)
-        Call<ResponseBody> getData(@Query("id") String user_id, @Query("title") String title, @Query("description") String description, @Query("heading") String heading, @Query("author") String author, @Query("url") String url, @Part MultipartBody.Part file);
+        Call<ResponseBody> getData(@Query("id") String user_id, @Query("title") String title, @Query("description") String description, @Query("author") String author, @Query("url") String url, @Part MultipartBody.Part file);
 
+        @GET(Constant.WebUrl.CREATE_SUCCESS_STORIES)
+        Call<ResponseBody> getData(@Query("id") String user_id, @Query("title") String title, @Query("description") String description, @Query("author") String author, @Query("url") String url);
 
-        @GET(Constant.WebUrl.EDIT_SUCCESS_STORIES)
-        Call<ResponseBody> sendEditData(@Query("success_id") String success_id, @Query("id") String user_id, @Query("title") String title, @Query("description") String description, @Query("heading") String heading, @Query("author") String author, @Query("url") String url, @Part MultipartBody.Part file);
+        @Multipart
+        @POST(Constant.WebUrl.EDIT_SUCCESS_STORIES)
+        Call<ResponseBody> sendEditData(@Query("success_id") String success_id, @Query("id") String user_id, @Query("title") String title, @Query("description") String description, @Query("author") String author, @Query("url") String url, @Part MultipartBody.Part file);
+
+        @POST(Constant.WebUrl.EDIT_SUCCESS_STORIES)
+        Call<ResponseBody> sendEditData(@Query("success_id") String success_id, @Query("id") String user_id, @Query("title") String title, @Query("description") String description, @Query("author") String author, @Query("url") String url);
     }
 
     @Override

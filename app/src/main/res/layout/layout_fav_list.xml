@@ -31,16 +31,15 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="90dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="7">
+            android:weightSum="3">
 
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="4"
-
+                android:layout_weight="2.1"
                 android:orientation="vertical"
                 android:padding="5dp">
 
@@ -52,7 +51,7 @@
                     <ImageView
                         android:layout_width="18dp"
                         android:layout_height="18dp"
-                        android:background="@mipmap/users_icon" />
+                        android:background="@mipmap/icon_user_grey" />
 
                     <TextView
                         android:id="@+id/tv_name"
@@ -70,92 +69,54 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="7dp"
-                    android:visibility="gone">
-
-                    <ImageView
-                        android:layout_width="18dp"
-                        android:layout_height="18dp"
-                        android:background="@mipmap/icon_mail" />
-
-                    <TextView
-                        android:id="@+id/tv_mail"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:gravity="center"
-                        android:singleLine="true"
-                        android:autoLink="email"
-                        android:text=""
-                        android:textColor="@color/black"
-                        android:textSize="@dimen/small_text_size" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
                     android:visibility="visible">
 
                     <!--<ImageView-->
-                        <!--android:layout_width="18dp"-->
-                        <!--android:layout_height="18dp"-->
-                        <!--android:background="@mipmap/icon_call" />-->
+                    <!--android:layout_width="18dp"-->
+                    <!--android:layout_height="18dp"-->
+                    <!--android:background="@mipmap/icon_call" />-->
 
                     <TextView
                         android:id="@+id/designation_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:gravity="center"
                         android:drawableLeft="@mipmap/icon_designation_grey"
+                        android:gravity="center"
                         android:text=""
                         android:textColor="@color/black"
                         android:textSize="@dimen/small_text_size" />
                 </LinearLayout>
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.5"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:id="@+id/tv_description"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/black"
-
-                    android:textSize="@dimen/small_text_size" />
-            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginRight="5dp"
-                android:layout_weight="1.6"
+                android:layout_weight=".9"
+                android:gravity="end"
                 android:orientation="vertical">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:gravity="center"
                     android:orientation="vertical">
 
-                    <TextView
+                    <ImageView
                         android:id="@+id/delfav_tv"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical|center"
-                        android:drawableTop="@mipmap/grey_delete"
-                        android:text="@string/un_fav"
-
-                        />
+                        android:padding="5dp"
+                        android:src="@mipmap/grey_delete" />
 
 
                     <android.support.v7.widget.AppCompatButton
                         android:id="@+id/btn_action"
                         style="?android:attr/buttonStyleSmall"
                         android:layout_width="match_parent"
-                        android:layout_height="35dp"
+                        android:layout_height="wrap_content"
                         android:layout_alignParentBottom="true"
                         android:layout_marginTop="5dp"
                         android:background="@drawable/button_selector_grey_shade"

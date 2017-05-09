@@ -11,6 +11,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,7 +45,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-
 public class FragmentFavTask extends Fragment implements Callback<UserSearch>, AdapterFavTask.ClickListener {
 
     private static final String TAG = FragmentFavTask.class.getSimpleName();
@@ -64,11 +64,8 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
         // Required empty public constructor
     }
 
-
     public static FragmentFavTask newInstance() {
         FragmentFavTask fragment = new FragmentFavTask();
-
-
         return fragment;
     }
 
@@ -121,7 +118,6 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
             getFavListServerData();
         } else {
             Toast.makeText(getActivity(), Constant.check_internet_connection, Toast.LENGTH_SHORT).show();
-
         }
 
 //        adapterNewTask = new AdapterNewTask(getContext());
@@ -151,7 +147,6 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
         Call<UserSearch> call = ifaqdata.getData(user_id);
 //        Call<NewTaskData> call = ifaqdata.getData("Open", "2");
         call.enqueue(this);
-
     }
 
     public void onButtonPressed(Uri uri) {
@@ -163,7 +158,6 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.activity_main_drawer, menu); // removed to not double the menu items
-
     }
 
 
@@ -176,8 +170,6 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
     @Override
     public void onItemClick(int position, View v) {
         showDialouge(position);
-
-
     }
 
 
@@ -197,6 +189,10 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
                     favTaskList = userSearchData.getData();
                     adapterNewTask = new AdapterFavTask(getContext(), favTaskList);
                     recyclerView.setAdapter(adapterNewTask);
+                    adapterNewTask.notifyDataSetChanged();
+                    Log.d("Fav_TaskResponse", userSearchData.getData().toString());
+                    Log.d("Fav_TaskResponse", userSearchData.getData().toString());
+                    Log.d("Fav_TaskResponse", userSearchData.getData().toString());
                     adapterNewTask.setOnItemClickListener(FragmentFavTask.this);
                 } else {
                     no_task_tv.setText(getString(R.string.no_favtask));
@@ -207,10 +203,6 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
     }
 
 
-
-
-
-
     @Override
     public void onFailure(Call<UserSearch> call, Throwable t) {
         if (pDialog.isShowing())
@@ -218,12 +210,9 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
     }
 
 
-
-
-
     protected void showDialouge(final int position) {
         // TODO Auto-generated method stub
-        final Dialog dialog = new Dialog(getContext()) {
+        final Dialog dialog = new Dialog(getActivity()) {
             @Override
             public void onStart() {
                 super.onStart();
@@ -235,50 +224,72 @@ public class FragmentFavTask extends Fragment implements Callback<UserSearch>, A
                 }
             }
         };
+
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.layout_user_information);
-        TextView tv_name,tv_email,tv_call,tv_designation,tv_level;
-        tv_name = (TextView)dialog.findViewById(R.id.tv_name);
-        tv_email = (TextView)dialog.findViewById(R.id.tv_email);
-        tv_call = (TextView)dialog.findViewById(R.id.tv_call);
-        tv_designation = (TextView)dialog.findViewById(R.id.tv_designation);
-        tv_level = (TextView)dialog.findViewById(R.id.tv_level);
+
+        dialog.setContentView(R.layout.user_information_layout);
+        TextView tv_name, tv_email, tv_personal_email, tv_call, tv_designation, tv_level;
+        tv_name = (TextView) dialog.findViewById(R.id.tv_name);
+        tv_email = (TextView) dialog.findViewById(R.id.tv_email);
+        tv_personal_email = (TextView) dialog.findViewById(R.id.tv_personal_email);
+        tv_call = (TextView) dialog.findViewById(R.id.tv_call);
+        tv_designation = (TextView) dialog.findViewById(R.id.tv_designation);
+        tv_level = (TextView) dialog.findViewById(R.id.tv_level);
 
 
-
-        if (userSearchData.getData().get(position).getUser_name()!=null && !userSearchData.getData().get(position).getUser_name().isEmpty()) {
-            tv_name.setText(" "+userSearchData.getData().get(position).getUser_name());
+        if (userSearchData.getData().get(position).getUser_name() != null && !userSearchData.getData().get(position).getUser_name().isEmpty()) {
+            tv_name.setVisibility(View.VISIBLE);
+            tv_name.setText(" " + userSearchData.getData().get(position).getUser_name());
+        } else {
+            tv_name.setVisibility(View.GONE);
         }
-        if (userSearchData.getData().get(position).getUser_email()!=null && !userSearchData.getData().get(position).getUser_email().isEmpty()) {
-            tv_email.setText(" "+userSearchData.getData().get(position).getUser_email());
+        if (userSearchData.getData().get(position).getUser_email() != null && !userSearchData.getData().get(position).getUser_email().isEmpty()) {
+            tv_email.setVisibility(View.VISIBLE);
+            tv_email.setText(" " + userSearchData.getData().get(position).getUser_email());
+        } else {
+            tv_email.setVisibility(View.GONE);
         }
-        if (userSearchData.getData().get(position).getUser_phone()!=null && !userSearchData.getData().get(position).getUser_phone().isEmpty()) {
-            tv_call.setText(" "+userSearchData.getData().get(position).getUser_phone());
+        if (userSearchData.getData().get(position).getPersonal_email() != null && !userSearchData.getData().get(position).getPersonal_email().isEmpty()) {
+            tv_personal_email.setVisibility(View.VISIBLE);
+            tv_personal_email.setText(" " + userSearchData.getData().get(position).getPersonal_email());
+        } else {
+            tv_personal_email.setVisibility(View.GONE);
         }
-        if (userSearchData.getData().get(position).getUser_designation()!=null && !userSearchData.getData().get(position).getUser_designation().isEmpty()) {
-            tv_designation.setText(" "+userSearchData.getData().get(position).getUser_designation());
+        if (userSearchData.getData().get(position).getUser_phone() != null && !userSearchData.getData().get(position).getUser_phone().isEmpty()) {
+            tv_call.setVisibility(View.VISIBLE);
+            tv_call.setText(" " + userSearchData.getData().get(position).getUser_phone());
+        } else {
+            tv_call.setVisibility(View.GONE);
         }
-        if (userSearchData.getData().get(position).getLevel()!=null && !userSearchData.getData().get(position).getLevel().isEmpty()) {
-            tv_level.setText(" "+userSearchData.getData().get(position).getLevel());
+        if (userSearchData.getData().get(position).getUser_designation() != null && !userSearchData.getData().get(position).getUser_designation().isEmpty()) {
+            tv_designation.setVisibility(View.VISIBLE);
+            tv_designation.setText(" " + userSearchData.getData().get(position).getUser_designation());
+        } else {
+            tv_designation.setVisibility(View.GONE);
+        }
+        if (userSearchData.getData().get(position).getUser_level() != null && !userSearchData.getData().get(position).getUser_level().isEmpty()) {
+            tv_level.setVisibility(View.GONE);
+            tv_level.setText(" " + userSearchData.getData().get(position).getUser_level());
+        } else {
+            tv_level.setVisibility(View.GONE);
         }
         Button btncancel = (Button) dialog.findViewById(R.id.btn_cancel);
-        btncancel.setOnClickListener(new View.OnClickListener() {
+        btncancel.setVisibility(View.GONE);
+//        btncancel.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dialog.dismiss();
+//            }
+//        });
+        ImageView delete_iv = (ImageView) dialog.findViewById(R.id.delete_iv);
+        delete_iv.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 dialog.dismiss();
             }
         });
-
         dialog.show();
     }
-
-
-
-
-
-
-
-
 
 
     public interface IFAQDATA {

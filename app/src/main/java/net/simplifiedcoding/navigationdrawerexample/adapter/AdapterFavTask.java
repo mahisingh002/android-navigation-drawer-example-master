@@ -9,7 +9,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -42,10 +41,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-/**
- * Created by vibes on 6/3/17.
- */
-
 public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHolder> {
 
     private Context context;
@@ -57,18 +52,39 @@ public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHo
     private static ClickListener clickListener;
     SharedPreferences sharedpreferences;
 
-
-    //    public AdapterNewTask(Context context, FaqModel data) {
-//        this.context = context;
-//        if (data != null) {
-//            faqModelsList = data.getFaq();
-//           // Log.e("check data on adapter",faqModelsList.toString());
-//        }
-//    }
     public AdapterFavTask(Context context, ArrayList<Search> data) {
         this.context = context;
         this.data = data;
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(context);
+    }
+
+
+    class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView designation_tv, tvName;
+        ImageView delfav_tv;
+        TextView delete_tv;
+        AppCompatButton tvAction;
+        String user_id;
+        CardView card_view;
+
+        public MyViewHolder(View v) {
+            super(v);
+
+            designation_tv = (TextView) v.findViewById(R.id.designation_tv);
+            // tvMail = (TextView) v.findViewById(R.id.tv_mail);
+//            tvDescription = (TextView) v.findViewById(R.id.tv_description);
+            tvName = (TextView) v.findViewById(R.id.tv_name);
+            tvAction = (AppCompatButton) v.findViewById(R.id.btn_action);
+            delfav_tv = (ImageView) v.findViewById(R.id.delfav_tv);
+            delete_tv = (TextView) v.findViewById(R.id.delete_tv);
+            card_view = (CardView) v.findViewById(R.id.card_view);
+            v.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            clickListener.onItemClick(getAdapterPosition(), view);
+        }
     }
 
     @Override
@@ -83,24 +99,29 @@ public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHo
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         if (data != null && data.size() > 0) {
             holder.delfav_tv.setTag(position);
-            if (data.get(position).getUser_phone() != null && !data.get(position).getUser_phone().isEmpty()) {
-                holder.designation_tv.setText(data.get(position).getUser_designation());
+            final Search search_fav = data.get(position);
+
+            if (search_fav.getUser_phone() != null && !search_fav.getUser_phone().isEmpty()) {
+                holder.designation_tv.setText("   " + search_fav.getUser_designation());
             }
-            if (data.get(position).getUser_email() != null && !data.get(position).getUser_email().isEmpty()) {
-                holder.tvMail.setText(data.get(position).getUser_email());
+
+            if (search_fav.getUser_name() != null && !search_fav.getUser_name().isEmpty()) {
+                holder.tvName.setText(search_fav.getUser_name());
             }
-//            if (data.get(position).getUser_designation() != null && !data.get(position).getUser_designation().isEmpty()) {
-//                holder.tvDescription.setText(data.get(position).getUser_designation());
-//            }
-            if (data.get(position).getUser_name() != null && !data.get(position).getUser_name().isEmpty()) {
-                holder.tvName.setText(data.get(position).getUser_name());
+
+            if (search_fav.getShowicon() == 1) {
+                holder.tvAction.setVisibility(View.VISIBLE);
+            } else if (search_fav.getShowicon() == 0) {
+                holder.tvAction.setVisibility(View.GONE);
+
             }
+
             holder.tvAction.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Bundle bundle = new Bundle();
-                    bundle.putString("email", data.get(position).getUser_email());
-                    bundle.putString("id", data.get(position).getUser_id());
+                    bundle.putString("email", search_fav.getUser_email());
+                    bundle.putString("id", search_fav.getUser_id());
                     Fragment fragment = new FragmentCreateTask();
                     fragment.setArguments(bundle);
                     ((MainActivity) context).replacefragment(fragment);
@@ -109,14 +130,11 @@ public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHo
             holder.delfav_tv.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String del_task_id = data.get(position).getUser_id();
-//
+                    String del_task_id = search_fav.getUser_id();
                     deleteTask(del_task_id, position);
                 }
             });
-
         }
-
     }
 
     @Override
@@ -128,46 +146,6 @@ public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHo
         AdapterFavTask.clickListener = clickListener;
     }
 
-    class MyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        TextView designation_tv, tvMail, tvName, delfav_tv;
-        TextView delete_tv;
-        AppCompatButton tvAction;
-        String user_id;
-        CardView card_view;
-
-        public MyViewHolder(View v) {
-            super(v);
-
-            designation_tv = (TextView) v.findViewById(R.id.designation_tv);
-            tvMail = (TextView) v.findViewById(R.id.tv_mail);
-//            tvDescription = (TextView) v.findViewById(R.id.tv_description);
-            tvName = (TextView) v.findViewById(R.id.tv_name);
-            tvAction = (AppCompatButton) v.findViewById(R.id.btn_action);
-            delfav_tv = (TextView) v.findViewById(R.id.delfav_tv);
-            delete_tv = (TextView) v.findViewById(R.id.delete_tv);
-            card_view = (CardView) v.findViewById(R.id.card_view);
-//            delfav_tv.setOnClickListener(this);
-            v.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View view) {
-//            switch (view.getId()) {
-//                case R.id.delfav_tv:
-//                    int pos = (int) view.getTag();
-//                    String del_task_id = data.get(pos).getUser_id();
-//
-//                    deleteTask(del_task_id, pos);
-//
-//                    break;
-//
-//            }
-            clickListener.onItemClick(getAdapterPosition(),view);
-
-        }
-
-
-    }
 
     public interface ClickListener {
         void onItemClick(int position, View v);
@@ -179,6 +157,7 @@ public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHo
 
 
     }
+
     public void deleteTask(final String del_task_id, final int pos) {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
         // Setting Dialog Title
@@ -199,7 +178,6 @@ public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHo
                 } else {
                     Toast.makeText(context, Constant.check_internet_connection, Toast.LENGTH_SHORT).show();
                 }
-
             }
         });
 
@@ -247,8 +225,6 @@ public class AdapterFavTask extends RecyclerView.Adapter<AdapterFavTask.MyViewHo
                         JSONObject jsonObject = new JSONObject(data);
                         if (jsonObject.getInt("status") == Constant.StatusCode.CLEANMONEY_CODE_SUCCESS) {
                             deleteItem(pos);
-
-
 //                                notifyDataSetChanged();
                         } else {
                             Toast.makeText(context, jsonObject.getString("tag") + "", Toast.LENGTH_LONG).show();

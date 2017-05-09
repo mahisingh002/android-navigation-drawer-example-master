@@ -27,6 +27,7 @@ import android.widget.Toast;
 import net.simplifiedcoding.navigationdrawerexample.Constant.Constant;
 import net.simplifiedcoding.navigationdrawerexample.Model.LoginModel;
 import net.simplifiedcoding.navigationdrawerexample.R;
+import net.simplifiedcoding.navigationdrawerexample.util.Config;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -145,6 +146,10 @@ public class SignInActivity extends Activity implements View.OnClickListener, Ca
         }
     }
 
+
+
+
+    
     void initView() {
 
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -276,17 +281,17 @@ public class SignInActivity extends Activity implements View.OnClickListener, Ca
                 .client(new OkHttpClient())
                 .build();
         ILOGINWITHOTP iloginwithotp = retrofit.create(ILOGINWITHOTP.class);
-        retrofit2.Call<LoginModel> call = null;
+        Call<LoginModel> call = null;
 
         call = iloginwithotp.getData(email, otp);
         call.enqueue(logindata);
 
     }
 
-    retrofit2.Callback<LoginModel> logindata = new retrofit2.Callback<LoginModel>() {
+    Callback<LoginModel> logindata = new Callback<LoginModel>() {
 
         @Override
-        public void onResponse(retrofit2.Call<LoginModel> call, retrofit2.Response<LoginModel> response) {
+        public void onResponse(Call<LoginModel> call, Response<LoginModel> response) {
             LoginModel sendotpdata = response.body();
             if (sendotpdata != null) {
                 if (pDialog.isShowing())
@@ -340,7 +345,7 @@ public class SignInActivity extends Activity implements View.OnClickListener, Ca
         }
 
         @Override
-        public void onFailure(retrofit2.Call<LoginModel> call, Throwable t) {
+        public void onFailure(Call<LoginModel> call, Throwable t) {
             if (pDialog.isShowing())
                 pDialog.dismiss();
             showMessage(parentLayout, getString(R.string.wentwrongmsg));
@@ -360,17 +365,17 @@ public class SignInActivity extends Activity implements View.OnClickListener, Ca
                 .client(new OkHttpClient())
                 .build();
         ILOGINITDUSER iloginitduser = retrofit.create(ILOGINITDUSER.class);
-        retrofit2.Call<LoginModel> call = null;
+        Call<LoginModel> call = null;
 
-        call = iloginitduser.getData(email, password);
+        call = iloginitduser.getData(email, password, Config.Browser_Value);
         call.enqueue(loginitd);
 
     }
 
-    retrofit2.Callback<LoginModel> loginitd = new retrofit2.Callback<LoginModel>() {
+    Callback<LoginModel> loginitd = new Callback<LoginModel>() {
 
         @Override
-        public void onResponse(retrofit2.Call<LoginModel> call, retrofit2.Response<LoginModel> response) {
+        public void onResponse(Call<LoginModel> call, Response<LoginModel> response) {
             LoginModel logindata = response.body();
             if (logindata != null) {
                 if (pDialog.isShowing())
@@ -430,7 +435,7 @@ public class SignInActivity extends Activity implements View.OnClickListener, Ca
         }
 
         @Override
-        public void onFailure(retrofit2.Call<LoginModel> call, Throwable t) {
+        public void onFailure(Call<LoginModel> call, Throwable t) {
             if (pDialog.isShowing())
                 pDialog.dismiss();
             showMessage(parentLayout, getString(R.string.wentwrongmsg));
@@ -449,7 +454,7 @@ public class SignInActivity extends Activity implements View.OnClickListener, Ca
 
     public interface ILOGINITDUSER {
         @GET(Constant.WebUrl.LOGINITD)
-        Call<LoginModel> getData(@Query("email") String email, @Query("password") String password);
+        Call<LoginModel> getData(@Query("email") String email, @Query("password") String password, @Query("browser") String browser);
     }
 
 

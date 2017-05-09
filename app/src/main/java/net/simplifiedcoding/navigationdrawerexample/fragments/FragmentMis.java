@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -20,28 +21,38 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import net.simplifiedcoding.navigationdrawerexample.Constant.Constant;
+import net.simplifiedcoding.navigationdrawerexample.Model.DataMis;
 import net.simplifiedcoding.navigationdrawerexample.Model.Datum;
+import net.simplifiedcoding.navigationdrawerexample.Model.FaqCommon;
 import net.simplifiedcoding.navigationdrawerexample.Model.MisDateData;
 import net.simplifiedcoding.navigationdrawerexample.Model.MisReportData;
 import net.simplifiedcoding.navigationdrawerexample.Model.ShowMemberData;
 import net.simplifiedcoding.navigationdrawerexample.Model.ShowPccitData;
+import net.simplifiedcoding.navigationdrawerexample.Model.ShowdialogMis;
 import net.simplifiedcoding.navigationdrawerexample.R;
 import net.simplifiedcoding.navigationdrawerexample.activities.MainActivity;
-import net.simplifiedcoding.navigationdrawerexample.adapter.AdapterMisDetail;
-import net.simplifiedcoding.navigationdrawerexample.adapter.AdapterNewTask;
+//import net.simplifiedcoding.navigationdrawerexample.adapter.AdapterMisDetail;
+import net.simplifiedcoding.navigationdrawerexample.adapter.AdapterDialogMis;
 import net.simplifiedcoding.navigationdrawerexample.util.AndroidUtil;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -58,7 +69,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
-
 public class FragmentMis extends Fragment implements Callback<ShowMemberData>, View.OnClickListener {
 
     private static final String TAG = FragmentMis.class.getSimpleName();
@@ -72,7 +82,7 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
     TextView no_task_tv;
     TextView select_memtv;
     View mySpinner;
-    Spinner member_spinner, pr_ccit_spinner, ccit_spinner, cit_spinner, misdate_spinner;
+    Spinner member_spinner, pr_ccit_spinner, ccit_spinner, cit_spinner, misdate_spinner, spinner_mistype, sp_verify;
     MemberAdapter memberAdapter;
     CitAdapter citAdapter;
     MemberCCcitAdapter memberccitAdapter;
@@ -95,6 +105,9 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
     private int year;
     private int month;
     private int day;
+    boolean clickfalg = true;
+    String textPrint;
+    String str_member, Str_date, str_pccit_member, str_cit_member, str_ccit_member, str_id;
 
     public FragmentMis() {
         // Required empty public constructor
@@ -103,8 +116,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
 
     public static FragmentMis newInstance() {
         FragmentMis fragment = new FragmentMis();
-
-
         return fragment;
     }
 
@@ -119,10 +130,7 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_mis_filter, container, false);
         sharedpreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-
         final Calendar cal = Calendar.getInstance();
-
         year = cal.get(Calendar.YEAR);
         month = cal.get(Calendar.MONTH);
         day = cal.get(Calendar.DAY_OF_MONTH);
@@ -155,6 +163,7 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
         cit_spinner = (Spinner) view.findViewById(R.id.cit_spinner);
         misdate_spinner = (Spinner) view.findViewById(R.id.misdate_spinner);
 
+        sp_verify = (Spinner) view.findViewById(R.id.verify_spinner);
 
         go_btn = (TextView) view.findViewById(R.id.go_btn);
         linear_adds_layout = (LinearLayout) view.findViewById(R.id.linear_adds_layout);
@@ -316,8 +325,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
 
                     @Override
                     public void onNothingSelected(AdapterView<?> parent) {
-
-
                     }
                 });
             }
@@ -372,7 +379,7 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                             misdateDataList = new ArrayList<MisDateData.Datum>();
                             misdateDataList = misDateData.getData();
                             MisDateData.Datum datumember = new MisDateData().new Datum();
-                            datumember.setMisDate("Show Date");
+                            datumember.setMisDate("Select Date");
                             misdateDataList.add(0, datumember);
                             misDateAdapter = new MisDateAdapter(getActivity(), R.layout.cus_spinner, misdateDataList);
                             misdate_spinner.setAdapter(misDateAdapter);
@@ -386,9 +393,10 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                                     misdate = "";
                                     return;
                                 }
-                                misdate = misDateData.getData().get(position).getMisDate();
-
-
+                               /* misdate = misdate_spinner.getSelectedItem().toString();
+                                Log.e("check spinner value",misdate);*/
+                                misdate = misdateDataList.get(position).getMisDate();
+                                date = misdate;
                             }
 
                             @Override
@@ -574,18 +582,12 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                                     } else {
                                         Toast.makeText(getActivity(), "Please check your Internet connection and try again", Toast.LENGTH_LONG).show();
                                     }
-
-
                                 }
 
                                 @Override
                                 public void onNothingSelected(AdapterView<?> parent) {
-
-
                                 }
                             });
-
-
                         } else {
 
                         }
@@ -593,7 +595,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
             }
 
 
@@ -602,7 +603,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                 if (pDialog != null) {
                     pDialog.dismiss();
                 }
-
             }
         });
     }
@@ -655,7 +655,7 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constant.WebUrl.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(new OkHttpClient().newBuilder().writeTimeout(1, TimeUnit.MINUTES).connectTimeout(1, TimeUnit.MINUTES).readTimeout(1, TimeUnit.MINUTES).build())
+                .client(new OkHttpClient().newBuilder().writeTimeout(2, TimeUnit.MINUTES).connectTimeout(2, TimeUnit.MINUTES).readTimeout(1, TimeUnit.MINUTES).build())
                 .build();
         ICREATETASK icreatetask = retrofit.create(ICREATETASK.class);
 
@@ -697,14 +697,10 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                                     } else {
                                         Toast.makeText(getActivity(), "Please check your Internet connection and try again", Toast.LENGTH_LONG).show();
                                     }
-
-
                                 }
 
                                 @Override
                                 public void onNothingSelected(AdapterView<?> parent) {
-
-
                                 }
                             });
 
@@ -718,13 +714,11 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
 
             }
 
-
             @Override
             public void onFailure(Call<ShowPccitData> call, Throwable t) {
                 if (pDialog != null) {
                     pDialog.dismiss();
                 }
-
             }
         });
     }
@@ -742,7 +736,7 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(Constant.WebUrl.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
-                .client(new OkHttpClient().newBuilder().writeTimeout(1, TimeUnit.MINUTES).connectTimeout(1, TimeUnit.MINUTES).readTimeout(1, TimeUnit.MINUTES).build())
+                .client(new OkHttpClient().newBuilder().writeTimeout(2, TimeUnit.MINUTES).connectTimeout(2, TimeUnit.MINUTES).readTimeout(1, TimeUnit.MINUTES).build())
                 .build();
         ICREATETASK icreatetask = retrofit.create(ICREATETASK.class);
 
@@ -763,8 +757,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                     if (showMemberData != null) {
 
                         if (Integer.parseInt(showMemberData.getStatus()) == Constant.StatusCode.CLEANMONEY_CODE_SUCCESS) {
-
-
                             citList = showMemberData.getData();
                             ShowMemberData.Datum datumember = new ShowMemberData().new Datum();
                             datumember.setMember("Select CIT");
@@ -832,6 +824,7 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
 
         ICREATETASK icreatetask = retrofit.create(ICREATETASK.class);
 
+
         Call<MisReportData> submitTask = icreatetask.submitAllData(date, member, cit_member, pccit_member, ccit_member);
 
         submitTask.enqueue(new Callback<MisReportData>() {
@@ -847,40 +840,78 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                         if (Integer.parseInt(misReportData.getStatus()) == Constant.StatusCode.CLEANMONEY_CODE_SUCCESS) {
 
                             List<Datum> list = misReportData.getData();
-                            if (list != null && list.size() > 0) {
 
+                            Str_date = null;
+                            str_member = null;
+                            str_pccit_member = null;
+                            str_ccit_member = null;
+                            str_cit_member = null;
+
+                            if (list != null && list.size() > 0) {
                                 header_layout.setVisibility(View.VISIBLE);
                                 if (misReportData.getDate() != null && !misReportData.getDate().isEmpty()) {
                                     date_tv.setVisibility(View.VISIBLE);
                                     date_tv.setText("Date: " + misReportData.getDate());
-                                }else{
+                                    Str_date = misReportData.getDate();
+
+
+                                } else {
                                     date_tv.setVisibility(View.GONE);
+                                }
+                                if (misReportData.getClickable().equalsIgnoreCase("1") && !misReportData.getClickable().equalsIgnoreCase("0")) {
+                                    clickfalg = true;
+                                } else {
+                                    clickfalg = false;
                                 }
                                 if (member != null && !member.isEmpty()) {
                                     members_tv.setVisibility(View.VISIBLE);
-                                    members_tv.setText("Members: " + member);
-
+                                    // members_tv.setText("Members: " + member);
+                                    str_member = member;
                                 } else {
                                     members_tv.setVisibility(View.GONE);
                                 }
                                 if (pccit_member != null && !pccit_member.isEmpty()) {
-                                    pr_ccit_tv.setVisibility(View.VISIBLE);
-                                    pr_ccit_tv.setText("Pr.CCIT: " + pccit_member);
+                                    pr_ccit_tv.setVisibility(View.GONE);
+                                    // pr_ccit_tv.setText("Pr.CCIT: " + pccit_member);
+
+                                    str_pccit_member = pccit_member;
 
                                 } else {
                                     pr_ccit_tv.setVisibility(View.GONE);
                                 }
                                 if (ccit_member != null && !ccit_member.isEmpty()) {
-                                    ccit_tv.setVisibility(View.VISIBLE);
-                                    ccit_tv.setText("CCIT: " + ccit_member);
+                                    ccit_tv.setVisibility(View.GONE);
+                                    // ccit_tv.setText("CCIT: " + ccit_member);
+                                    str_ccit_member = ccit_member;
                                 } else {
                                     ccit_tv.setVisibility(View.GONE);
                                 }
                                 if (cit_member != null && !cit_member.isEmpty()) {
-                                    cit_tv.setVisibility(View.VISIBLE);
-                                    cit_tv.setText("CIT: " + cit_member);
+                                    cit_tv.setVisibility(View.GONE);
+                                    // cit_tv.setText("CIT: " + cit_member);
+                                    str_cit_member = cit_member;
                                 } else {
                                     cit_tv.setVisibility(View.GONE);
+                                }
+                                if (Str_date != null) {
+                                    if (str_member != null) {
+                                        if (str_pccit_member != null) {
+                                            if (str_ccit_member != null) {
+                                                if (str_cit_member != null) {
+                                                    members_tv.setText(str_member + " >> " + str_pccit_member + " >> " + str_ccit_member + ">>" + str_cit_member);
+                                                } else {
+                                                    members_tv.setText(str_member + " >> " + str_pccit_member + " >> " + str_ccit_member);
+                                                }
+                                            } else {
+                                                members_tv.setText(str_member + " >> " + str_pccit_member);
+                                            }
+                                        } else {
+                                            members_tv.setText(str_member);
+                                        }
+
+                                    } else {
+                                        // members_tv.setText(Str_date);
+                                    }
                                 }
 
                                 LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -891,7 +922,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                                 adapterMisDetail = new AdapterMisDetail(getContext(), list);
                                 recyclerView.setAdapter(adapterMisDetail);
                             } else {
-
                             }
                         } else {
 
@@ -995,7 +1025,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
 
         public View getCustomView(int position, View convertView, ViewGroup parent) {
 
-
             if (getActivity() != null) {
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 mySpinner = inflater.inflate(R.layout.spinner_item, parent, false);
@@ -1058,12 +1087,13 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                 LayoutInflater inflater = getActivity().getLayoutInflater();
                 mySpinner = inflater.inflate(R.layout.spinner_item, parent, false);
                 TextView city_parent_text = (TextView) mySpinner.findViewById(R.id.tv);
-                try {
+                city_parent_text.setText(objects.get(position).getMisDate());
+                /*try {
                     city_parent_text.setText(AndroidUtil.formatDate(objects.get(position).getMisDate(),"yyyy-mm-dd","dd-mm-yyyy"));
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
-                         }
+                }*/
+            }
             return mySpinner;
         }
 
@@ -1075,12 +1105,10 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
                 mySpinner = inflater.inflate(R.layout.spinner_item_edit, parent, false);
                 TextView city_child_text = (TextView) mySpinner.findViewById(R.id.tv);
 
-
-                city_child_text.setText(AndroidUtil.formatDate(objects.get(position).getMisDate(),"yyyy-mm-dd","dd-mm-yyyy"));
+                city_child_text.setText(objects.get(position).getMisDate());
             }
             return mySpinner;
         }
-
     }
 
 
@@ -1099,6 +1127,10 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
 
         @GET(Constant.WebUrl.SHOW_MISDATE)
         Call<MisDateData> submitMisDate();
+
+        @GET(Constant.WebUrl.DIALOG_TASK)
+        Call<ShowdialogMis> dialogTask(@Query("date") String date, @Query("id") String id, @Query("member") String member, @Query("prccit") String prccit, @Query("ccit") String ccit);
+
     }
 
     public static class SelectDateFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
@@ -1112,8 +1144,6 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
             DatePickerDialog mDatePicker = new DatePickerDialog(getActivity(), this, yy, mm, dd);
 
             mDatePicker.getWindow().getAttributes().windowAnimations = R.style.DialogAnimationEditProfile;
-//            mDatePicker.getDatePicker().setMinDate(System.currentTimeMillis());
-            //            mDatePicker.getDatePicker().setMaxDate(System.currentTimeMillis());
 
             return mDatePicker;
         }
@@ -1123,10 +1153,210 @@ public class FragmentMis extends Fragment implements Callback<ShowMemberData>, V
         }
 
         public void populateSetDate(int year, int month, int day) {
-//            date_filter_tv.setText(day + "-" + month + "-" + year);
-//            date_filter_tv.setTextColor(getResources().getColor(R.color.textviewcolor));
-            // dob_calender.setText(month + "/" + day + "/" + year);
-
         }
     }
+
+
+    public class AdapterMisDetail extends RecyclerView.Adapter<AdapterMisDetail.MyViewHolder> {
+
+        private Context context;
+        private ArrayList<FaqCommon> faqModelsList;
+        List<Datum> data;
+        String status;
+
+        public AdapterMisDetail(Context context, List<Datum> data) {
+            this.context = context;
+            this.data = data;
+        }
+
+        @Override
+        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view;
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.mis_detail_item, parent, false);
+            MyViewHolder holder = new MyViewHolder(view);
+            return holder;
+        }
+
+        @Override
+        public void onBindViewHolder(MyViewHolder holder, final int position) {
+            if (data.get(position).getName() != null && !data.get(position).getName().isEmpty()) {
+                holder.mis_name_tv.setText(data.get(position).getName());
+            }
+            if (data.get(position).getVal() != null && !data.get(position).getVal().isEmpty()) {
+                String value = AndroidUtil.formatDoubleData(Double.valueOf(data.get(position).getVal()));
+                holder.mis_value_tv.setText(value);
+            }
+
+            if (clickfalg == true) {
+                holder.mis_name_tv.setPaintFlags(holder.mis_name_tv.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+                holder.mis_name_tv.setTextColor(getResources().getColor(R.color.blue));
+
+            }
+
+            holder.ChildViewclick.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (clickfalg) {
+                        str_id = data.get(position).getId();
+                        pDialog = new ProgressDialog(context, R.style.DialogTheme);
+                        pDialog.setCancelable(false);
+                        // TODO Auto-generated method stub
+                        final Dialog dialog = new Dialog(getContext()) {
+                            @Override
+                            public void onStart() {
+                                super.onStart();
+                                Dialog dialog = this;
+                                if (dialog != null) {
+                                    int width = ViewGroup.LayoutParams.MATCH_PARENT;
+                                    int height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                                    dialog.getWindow().setLayout(width, height);
+                                }
+                            }
+                        };
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        dialog.setContentView(R.layout.customdialog);
+//                        dialog.setTitle("Title...");
+                        // set the custom dialog components - text, image and button
+                        final RecyclerView recyclerview_DialogMIs = (RecyclerView) dialog.findViewById(R.id.recyclerview_DialogMIs);
+                        final ProgressBar misDialogProgress = (ProgressBar) dialog.findViewById(R.id.misDialogProgress);
+                        final TextView tv_misDialong = (TextView) dialog.findViewById(R.id.tv_misDialong);
+                        final ArrayList<DataMis> arrayListMIs = new ArrayList<>();
+
+                        final ImageView dialogButton = (ImageView) dialog.findViewById(R.id.btn_click);
+                        final TextView tv_NORecord = (TextView) dialog.findViewById(R.id.tv_NORecord);
+
+                        final OkHttpClient[] client = {new OkHttpClient.Builder().addInterceptor(new HttpLoggingInterceptor().
+                                setLevel(HttpLoggingInterceptor.Level.BODY)).readTimeout(180, TimeUnit.SECONDS).
+                                connectTimeout(120, TimeUnit.SECONDS).build()};
+                        Retrofit.Builder builder = new Retrofit.Builder().baseUrl(Constant.WebUrl.BASE_URL).
+                                addConverterFactory(GsonConverterFactory.create());
+                        Retrofit retrofitDialog = builder.client(client[0]).build();
+
+                        ICREATETASK dialogValue = retrofitDialog.create(ICREATETASK.class);
+
+                        pDialog = new ProgressDialog(context, R.style.DialogTheme);
+                        pDialog.setCancelable(true);
+                        misDialogProgress.setVisibility(View.VISIBLE);
+                        recyclerview_DialogMIs.setVisibility(View.GONE);
+                        tv_NORecord.setVisibility(View.GONE);
+
+                        if (pDialog != null) {
+                            Call<ShowdialogMis> submitTask = dialogValue.dialogTask(Str_date, str_id, str_member,
+                                    str_pccit_member, str_ccit_member);
+                            submitTask.enqueue(
+                                    new Callback<ShowdialogMis>() {
+                                        @Override
+                                        public void onResponse(Call<ShowdialogMis> call, Response<ShowdialogMis> response) {
+
+                                            if (pDialog != null) {
+                                                pDialog.dismiss();
+                                            }
+
+                                            misDialogProgress.setVisibility(View.GONE);
+                                            recyclerview_DialogMIs.setVisibility(View.VISIBLE);
+                                            tv_NORecord.setVisibility(View.GONE);
+
+                                            ShowdialogMis showdialogMis = response.body();
+                                            for (DataMis dataMis : showdialogMis.getData())
+                                                arrayListMIs.add(dataMis);
+
+                                            String strTitle = showdialogMis.getName();
+                                            tv_misDialong.setText(strTitle);
+                                            AdapterDialogMis adapterDialogMis = new AdapterDialogMis(context, arrayListMIs);
+                                            RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
+                                            recyclerview_DialogMIs.setLayoutManager(mLayoutManager);
+                                            recyclerview_DialogMIs.setItemAnimator(new DefaultItemAnimator());
+                                            recyclerview_DialogMIs.setAdapter(adapterDialogMis);
+                                            adapterDialogMis.notifyDataSetChanged();
+
+                                            if (pDialog != null) {
+                                                pDialog.dismiss();
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure
+                                                (Call<ShowdialogMis> call, Throwable t) {
+                                            if (pDialog != null) {
+                                                pDialog.dismiss();
+                                            }
+
+                                            misDialogProgress.setVisibility(View.GONE);
+                                            recyclerview_DialogMIs.setVisibility(View.GONE);
+                                            tv_NORecord.setVisibility(View.VISIBLE);
+                                        }
+                                    });
+                        }
+                        dialogButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+                            }
+                        });
+                        dialog.show();
+                    }
+                }
+            });
+        }
+
+        @Override
+        public int getItemCount() {
+            return data.size();
+        }
+
+        class MyViewHolder extends RecyclerView.ViewHolder {
+            TextView mis_name_tv, mis_value_tv;
+            LinearLayout ChildViewclick;
+
+            public MyViewHolder(View v) {
+                super(v);
+                mis_name_tv = (TextView) v.findViewById(R.id.mis_name_tv);
+                mis_value_tv = (TextView) v.findViewById(R.id.mis_value_tv);
+                ChildViewclick = (LinearLayout) v.findViewById(R.id.id_mis_child);
+            }
+        }
+    }
+
+   /* private ArrayList<ShowdialogMis> openDataDialog_MisValue() {
+        ArrayList<ShowdialogMis> dataMisArrayList = new ArrayList<>();
+
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)).readTimeout(180, TimeUnit.SECONDS).connectTimeout(120, TimeUnit.SECONDS).build();
+        Retrofit.Builder builder = new Retrofit.Builder().baseUrl(Constant.WebUrl.BASE_URL).addConverterFactory(GsonConverterFactory.create());
+        Retrofit retrofitDialog = builder.client(client).build();
+
+        ICREATETASK dialogValue = retrofitDialog.create(ICREATETASK.class);
+
+        pDialog = new ProgressDialog(getContext(), R.style.DialogTheme);
+        pDialog.setCancelable(true);
+        if (pDialog != null) {
+            pDialog.setMessage("Please Wait...");
+            if (!pDialog.isShowing())
+                pDialog.show();
+
+            Call<ShowdialogMis> submitTask = dialogValue.dialogTask(Str_date, str_id, str_member, str_pccit_member);
+            final ArrayList<ShowdialogMis> finalDataMisArrayList = dataMisArrayList;
+            submitTask.enqueue(
+                    new Callback<ShowdialogMis>() {
+                        @Override
+                        public void onResponse(Call<ShowdialogMis> call, Response<ShowdialogMis> response) {
+                            if (pDialog != null) {
+                                pDialog.dismiss();
+                            }
+                            ShowdialogMis showdialogMis = response.body();
+                            finalDataMisArrayList.add(showdialogMis);
+                            showdialogMis.getData();
+                        }
+
+                        @Override
+                        public void onFailure(Call<ShowdialogMis> call, Throwable t) {
+                            if (pDialog != null) {
+                                pDialog.dismiss();
+                            }
+                        }
+                    });
+        }
+        return dataMisArrayList;
+    }
+*/
+
 }
